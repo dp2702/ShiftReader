@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>ShiftReader</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#637083;--line:#d9dfeb;--accent:#2563eb;--accent2:#1d4ed8;--danger:#b42318;--warn:#9a6700;--ok:#067647;--shadow:0 12px 35px rgba(29,43,76,.09)}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(125deg,#172554,#1d4ed8);color:white;padding:30px 20px}header div,main{max-width:1180px;margin:auto}h1{margin:0 0 5px;font-size:clamp(28px,5vw,46px)}header p{margin:0;opacity:.88}.privacy{display:inline-block;margin-top:12px;padding:5px 10px;border:1px solid #ffffff55;border-radius:999px;font-size:13px}
+main{padding:22px 16px 50px}.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}h2{font-size:18px;margin:0 0 14px}.drop{min-height:190px;border:2px dashed #9aabd0;border-radius:13px;display:grid;place-items:center;text-align:center;padding:24px;background:#f8faff;cursor:pointer}.drop.drag{border-color:var(--accent);background:#eff6ff}.drop strong{display:block;font-size:18px}.drop input{display:none}.previewWrap{margin-top:15px;max-height:540px;overflow:auto;border-radius:10px;background:#e8edf6}.previewWrap img{display:block;max-width:100%;height:auto;margin:auto}.toolbar,.settings,.actions,.tabs{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.settings{margin:15px 0}.field{display:grid;gap:5px;flex:1;min-width:145px}.field label{font-size:12px;color:var(--muted);font-weight:700}.field input{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)}button,.fileButton{border:0;border-radius:9px;padding:10px 14px;font-weight:750;cursor:pointer;background:#e7ecf5;color:var(--text)}button.primary,.fileButton.primary{background:var(--accent);color:#fff}button:hover{filter:brightness(.97)}button:disabled{opacity:.5;cursor:not-allowed}.status{margin:12px 0;padding:11px;border-radius:9px;background:#eef2f8;color:var(--muted);white-space:pre-wrap}.status.ok{background:#ecfdf3;color:var(--ok)}.status.warn{background:#fffaeb;color:var(--warn)}.status.error{background:#fef3f2;color:var(--danger)}progress{width:100%;height:12px}.legend{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0;color:var(--muted);font-size:13px}.dot{width:12px;height:12px;display:inline-block;border-radius:3px;margin-right:5px}.debug{display:none;margin-top:14px;max-width:100%;height:auto;border:1px solid var(--line);background:#fff}.debug.show{display:block}textarea{width:100%;min-height:420px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);padding:12px;font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.tabs button.active{background:#dbeafe;color:#1d4ed8}.small{font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;font-weight:750}.diag{max-height:180px;overflow:auto;font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap}.count{font-weight:800;color:var(--accent)}@media(max-width:850px){.grid{grid-template-columns:1fr}textarea{min-height:300px}}@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#172033;--text:#edf2ff;--muted:#a9b4c7;--line:#344158;--shadow:none}.drop{background:#121c30}.previewWrap{background:#0b1220}.status{background:#202b40}.field input{background:#121c30}.tabs button.active{background:#19376e;color:#bfdbfe}}
+</style>
+</head>
+<body>
+<header><div><h1>ShiftReader</h1><p>Turn a color-coded break timetable screenshot into editable text.</p><span class="privacy">Local browser processing · no application upload</span></div></header>
+<main>
+<div class="grid">
+<section class="card">
+<h2>1. Add screenshot</h2>
+<label class="drop" id="drop"><input id="file" type="file" accept="image/png,image/jpeg,image/webp"><span><strong>Drop timetable here</strong>or click to choose PNG, JPG, or WebP</span></label>
+<div class="previewWrap" id="previewWrap" hidden><img id="preview" alt="Timetable preview"></div>
+<div class="settings">
+<div class="field"><label for="namePct">Name column (% of width)</label><input id="namePct" type="number" min="8" max="30" step="0.5" value="15"></div>
+<div class="field"><label for="workWidth">Processing width (px)</label><input id="workWidth" type="number" min="1000" max="2600" step="100" value="1800"></div>
+<div class="field"><label for="colorTolerance">Color tolerance</label><input id="colorTolerance" type="number" min="35" max="150" value="92"></div>
+</div>
+<div class="legend"><span><i class="dot" style="background:#3b82f6"></i>Short</span><span><i class="dot" style="background:#f97316"></i>Meal</span><span><i class="dot" style="background:#22c55e"></i>WB20</span><span><i class="dot" style="background:#a855f7"></i>WB70</span></div>
+<div class="toolbar"><button class="primary" id="process" disabled>Read timetable</button><button id="cancel" disabled>Cancel</button><button id="debugToggle" disabled>Show detection overlay</button></div>
+<progress id="progress" max="1" value="0"></progress>
+<div class="status" id="status">Choose a screenshot to begin.</div>
+<canvas class="debug" id="debug"></canvas>
+<details><summary>Diagnostics</summary><div class="diag" id="diag">No run yet.</div></details>
+</section>
+<section class="card">
+<h2>2. Review result <span class="count" id="count"></span></h2>
+<div class="tabs"><button id="employeeTab" class="active">By employee</button><button id="timeTab">Chronological</button></div>
+<p class="small">OCR is imperfect. Compare the result with the screenshot and edit mistakes before exporting.</p>
+<textarea id="output" spellcheck="false" placeholder="Results will appear here..."></textarea>
+<div class="actions"><button class="primary" id="copy">Copy</button><button id="txt">TXT</button><button id="csv">CSV</button><button id="json">JSON</button></div>
+</section>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const state={img:null,fileName:'timetable',rows:[],cancel:false,view:'employee',log:[]};
+const refs=[
+ {type:'Short',rgb:[59,130,246]}, {type:'Meal',rgb:[249,115,22]},
+ {type:'WB20',rgb:[34,197,94]}, {type:'WB70',rgb:[168,85,247]}
+];
+function log(s){state.log.push(s);$('diag').textContent=state.log.join('\n');}
+function status(s,kind=''){$('status').textContent=s;$('status').className='status '+kind;}
+function setProgress(v){$('progress').value=Math.max(0,Math.min(1,v));}
+function saveSettings(){['namePct','workWidth','colorTolerance'].forEach(k=>localStorage.setItem('sr_'+k,$(k).value));}
+function loadSettings(){['namePct','workWidth','colorTolerance'].forEach(k=>{const v=localStorage.getItem('sr_'+k);if(v)$(k).value=v});}
+loadSettings();
+['namePct','workWidth','colorTolerance'].forEach(k=>$(k).addEventListener('change',saveSettings));
+$('drop').addEventListener('dragover',e=>{e.preventDefault();$('drop').classList.add('drag')});
+$('drop').addEventListener('dragleave',()=>$('drop').classList.remove('drag'));
+$('drop').addEventListener('drop',e=>{e.preventDefault();$('drop').classList.remove('drag');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
+$('file').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
+function loadFile(file){
+ if(!file.type.startsWith('image/'))return status('That file is not a supported image.','error');
+ state.fileName=file.name.replace(/\.[^.]+$/,'')||'timetable';
+ const url=URL.createObjectURL(file), img=new Image();
+ img.onload=()=>{state.img=img;$('preview').src=url;$('previewWrap').hidden=false;$('process').disabled=false;$('debugToggle').disabled=true;status(`Ready: ${file.name} · ${img.naturalWidth}×${img.naturalHeight}`,'ok');};
+ img.onerror=()=>status('The image could not be opened.','error');img.src=url;
+}
+function nearestType(r,g,b,tol){let best=null,dist=Infinity;for(const ref of refs){const d=Math.hypot(r-ref.rgb[0],g-ref.rgb[1],b-ref.rgb[2]);if(d<dist){dist=d;best=ref}}return dist<=tol?best.type:null}
+function detectBoxes(canvas){
+ const ctx=canvas.getContext('2d',{willReadFrequently:true}),w=canvas.width,h=canvas.height,data=ctx.getImageData(0,0,w,h).data;
+ const step=3,gw=Math.ceil(w/step),gh=Math.ceil(h/step),mask=new Uint8Array(gw*gh),types=new Array(gw*gh),tol=+$('colorTolerance').value;
+ for(let gy=0;gy<gh;gy++)for(let gx=0;gx<gw;gx++){const x=Math.min(w-1,gx*step),y=Math.min(h-1,gy*step),i=(y*w+x)*4;const t=nearestType(data[i],data[i+1],data[i+2],tol);if(t){mask[gy*gw+gx]=1;types[gy*gw+gx]=t}}
+ const seen=new Uint8Array(mask.length),components=[];
+ for(let i=0;i<mask.length;i++)if(mask[i]&&!seen[i]){
+  const q=[i];seen[i]=1;let qi=0,minx=1e9,miny=1e9,maxx=0,maxy=0,count=0,votes={};
+  while(qi<q.length){const p=q[qi++],x=p%gw,y=(p/gw)|0;count++;minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);votes[types[p]]=(votes[types[p]]||0)+1;
+   for(const n of [p-1,p+1,p-gw,p+gw]){if(n>=0&&n<mask.length&&!seen[n]&&mask[n]&&Math.abs((n%gw)-x)<=1){seen[n]=1;q.push(n)}}}
+  const bw=(maxx-minx+1)*step,bh=(maxy-miny+1)*step;
+  if(count>35&&bw>28&&bh>13&&bw<w*.22&&bh<h*.08){const type=Object.entries(votes).sort((a,b)=>b[1]-a[1])[0][0];components.push({x:minx*step,y:miny*step,w:bw,h:bh,type});}
+ }
+ // Exclude title legend and merge overlapping fragments.
+ let boxes=components.filter(b=>b.y>h*.075&&b.x>w*.12);
+ boxes.sort((a,b)=>a.y-b.y||a.x-b.x);
+ const merged=[];
+ for(const b of boxes){const m=merged.find(x=>x.type===b.type&&Math.abs((x.y+x.h/2)-(b.y+b.h/2))<Math.max(x.h,b.h)*.55&&b.x<=x.x+x.w+8&&b.x+b.w>=x.x-8);if(m){const x2=Math.max(m.x+m.w,b.x+b.w),y2=Math.max(m.y+m.h,b.y+b.h);m.x=Math.min(m.x,b.x);m.y=Math.min(m.y,b.y);m.w=x2-m.x;m.h=y2-m.y}else merged.push({...b})}
+ return merged;
+}
+function groupRows(boxes,h){
+ const sorted=[...boxes].sort((a,b)=>(a.y+a.h/2)-(b.y+b.h/2)),groups=[];
+ for(const b of sorted){const cy=b.y+b.h/2;let g=groups.find(r=>Math.abs(r.y-cy)<Math.max(10,h*.012));if(!g){g={y:cy,boxes:[]};groups.push(g)}g.boxes.push(b);g.y=g.boxes.reduce((s,x)=>s+x.y+x.h/2,0)/g.boxes.length}
+ return groups.sort((a,b)=>a.y-b.y);
+}
+function cropCanvas(src,x,y,w,h,scale=2){const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*scale));c.height=Math.max(1,Math.round(h*scale));const cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);cx.imageSmoothingEnabled=true;cx.drawImage(src,x,y,w,h,0,0,c.width,c.height);return c}
+function normalizeTime(text){
+ let s=(text||'').replace(/[Oo]/g,'0').replace(/[Il|]/g,'1').replace(/[—–]/g,'-').replace(/\s+/g,' ');
+ const hits=[...s.matchAll(/([0-2]?\d)\s*[:.]\s*([0-5]\d)/g)].map(m=>String(+m[1]).padStart(2,'0')+':'+m[2]);
+ if(hits.length>=2)return hits[0]+'-'+hits[1];
+ const compact=[...s.matchAll(/\b([0-2]\d)([0-5]\d)\b/g)].map(m=>m[1]+':'+m[2]);
+ return compact.length>=2?compact[0]+'-'+compact[1]:(hits[0]||compact[0]||'??:??-??:??');
+}
+async function recognize(worker,canvas,params={}){const r=await worker.recognize(canvas,params);return r.data}
+async function processImage(){
+ if(!state.img)return; if(!window.Tesseract)return status('Tesseract.js did not load. The CDN may be blocked.','error');
+ state.cancel=false;state.log=[];$('process').disabled=true;$('cancel').disabled=false;setProgress(.01);status('Preparing image…');
+ try{
+  const maxW=Math.max(1000,Math.min(2600,+$('workWidth').value||1800)),scale=Math.min(1,maxW/state.img.naturalWidth),w=Math.round(state.img.naturalWidth*scale),h=Math.round(state.img.naturalHeight*scale);
+  const work=document.createElement('canvas');work.width=w;work.height=h;work.getContext('2d').drawImage(state.img,0,0,w,h);log(`Working image: ${w}x${h}, scale ${scale.toFixed(3)}`);
+  status('Detecting colored break boxes…');const boxes=detectBoxes(work),groups=groupRows(boxes,h);log(`Detected boxes: ${boxes.length}`);log(`Detected rows: ${groups.length}`);if(!boxes.length)throw new Error('No colored break boxes were detected. Try increasing Color tolerance.');
+  drawDebug(work,groups);$('debugToggle').disabled=false;setProgress(.12);
+  status('Loading OCR engine… First run can take longer.');
+  const worker=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.progress!=null)setProgress(.12+m.progress*.13)}});
+  if(state.cancel){await worker.terminate();throw new Error('Cancelled');}
+  const nameW=Math.round(w*(+$('namePct').value/100)),rowGap=groups.length>1?groups.slice(1).reduce((s,r,i)=>s+(r.y-groups[i].y),0)/(groups.length-1):h*.04;
+  state.rows=[];
+  for(let ri=0;ri<groups.length;ri++){
+   if(state.cancel){await worker.terminate();throw new Error('Cancelled');}
+   const row=groups[ri],top=Math.max(0,row.y-rowGap*.43),rh=Math.min(h-top,rowGap*.86);
+   status(`Reading employee ${ri+1} of ${groups.length}…`);
+   const nameData=await recognize(worker,cropCanvas(work,0,top,nameW,rh,2.4),{tessedit_pageseg_mode:'7'});
+   let name=(nameData.text||'').replace(/[^\p{L}\p{M}'’ -]/gu,' ').replace(/\s+/g,' ').trim();
+   if(name.length<2)name=`Employee ${String(ri+1).padStart(2,'0')}`;
+   const breaks=[];
+   row.boxes.sort((a,b)=>a.x-b.x);
+   for(const b of row.boxes){
+    const pad=3,crop=cropCanvas(work,Math.max(0,b.x-pad),Math.max(0,b.y-pad),Math.min(w-b.x+pad,b.w+pad*2),Math.min(h-b.y+pad,b.h+pad*2),2.4);
+    const d=await recognize(worker,crop,{tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789:-.'});
+    breaks.push({startEnd:normalizeTime(d.text),type:b.type,raw:(d.text||'').trim(),x:b.x});
+   }
+   state.rows.push({name,breaks,y:row.y,confidence:Math.round(nameData.confidence||0)});
+   setProgress(.25+.72*((ri+1)/groups.length));
+  }
+  await worker.terminate();renderOutput();setProgress(1);status(`Finished. Found ${state.rows.length} employees and ${state.rows.reduce((s,r)=>s+r.breaks.length,0)} breaks. Verify OCR before use.`,'ok');
+  log('OCR complete. Unknown times are marked with question marks.');
+ }catch(e){status(e.message==='Cancelled'?'Processing cancelled.':`Could not finish: ${e.message}`,'error');log(String(e.stack||e));}
+ finally{$('process').disabled=false;$('cancel').disabled=true}
+}
+function drawDebug(src,groups){const c=$('debug');c.width=src.width;c.height=src.height;const x=c.getContext('2d');x.drawImage(src,0,0);x.lineWidth=Math.max(2,src.width/800);x.font=`${Math.max(12,src.width/100)}px sans-serif`;groups.forEach((r,i)=>{r.boxes.forEach(b=>{x.strokeStyle=b.type==='Short'?'#001cff':b.type==='Meal'?'#b62500':b.type==='WB20'?'#006b31':'#6512b8';x.strokeRect(b.x,b.y,b.w,b.h)});x.fillStyle='#111';x.fillText(String(i+1),4,r.y)});}
+function renderOutput(){
+ let text='';
+ if(state.view==='employee')text=state.rows.map(r=>`${r.name}\n${r.breaks.map(b=>`${b.startEnd} ${b.type}`).join('\n')}`).join('\n\n');
+ else {const all=[];state.rows.forEach(r=>r.breaks.forEach(b=>all.push({name:r.name,...b})));all.sort((a,b)=>a.startEnd.localeCompare(b.startEnd));const groups={};all.forEach(b=>(groups[b.startEnd.split('-')[0]]??=[]).push(b));text=Object.entries(groups).map(([t,bs])=>`${t}\n${bs.map(b=>`${b.name} - ${b.type} (${b.startEnd})`).join('\n')}`).join('\n\n')}
+ $('output').value=text;$('count').textContent=state.rows.length?`(${state.rows.length})`:'';
+}
+$('process').addEventListener('click',processImage);$('cancel').addEventListener('click',()=>{state.cancel=true;status('Cancelling after the current OCR step…','warn')});
+$('debugToggle').addEventListener('click',()=>{const show=$('debug').classList.toggle('show');$('debugToggle').textContent=show?'Hide detection overlay':'Show detection overlay'});
+$('employeeTab').addEventListener('click',()=>{state.view='employee';$('employeeTab').classList.add('active');$('timeTab').classList.remove('active');renderOutput()});
+$('timeTab').addEventListener('click',()=>{state.view='time';$('timeTab').classList.add('active');$('employeeTab').classList.remove('active');renderOutput()});
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('output').value);status('Result copied.','ok')}catch{ $('output').select();document.execCommand('copy')}});
+function download(name,type,data){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('txt').addEventListener('click',()=>download(state.fileName+'-breaks.txt','text/plain;charset=utf-8',$('output').value));
+$('json').addEventListener('click',()=>download(state.fileName+'-breaks.json','application/json',JSON.stringify(state.rows,null,2)));
+$('csv').addEventListener('click',()=>{const q=v=>'"'+String(v).replaceAll('"','""')+'"';const lines=['Name,Start,End,Type'];state.rows.forEach(r=>r.breaks.forEach(b=>{const [s,e]=b.startEnd.split('-');lines.push([r.name,s,e,b.type].map(q).join(','))}));download(state.fileName+'-breaks.csv','text/csv;charset=utf-8','\ufeff'+lines.join('\n'))});
+</script>
+</body>
+</html>
