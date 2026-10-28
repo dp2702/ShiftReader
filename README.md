@@ -1,28 +1,13 @@
-# ShiftReader
+# ShiftReader v2
 
-A browser-only GitHub Pages tool that converts a color-coded shift timetable screenshot into editable text, CSV, and JSON.
+This version no longer OCRs the tiny time labels. It detects colored blocks and calculates times from their horizontal chart position, snapping to five-minute intervals. OCR is only used for employee names, using local Turkish and English language models.
 
-## Quick start
+## Upload
+Upload `index.html`, `README.md`, `plan.md`, and the entire `vendor` folder without changing its structure.
 
-1. Upload `index.html`, `plan.md`, `README.md`, and the complete `vendor` folder to the repository root.
-2. In GitHub, open **Settings → Pages**.
-3. Under **Build and deployment**, select **Deploy from a branch**.
-4. Select the branch and `/ (root)`, then save.
-5. Open the published site and choose a timetable screenshot.
+## Alignment
+Defaults are tuned for the supplied timetable format:
+- 16:00 grid line: 15.35%
+- 23:00 grid line: 92.75%
 
-## How to use
-
-1. Choose, drop, or paste a screenshot. To paste, copy the image and press **Ctrl+V** anywhere on the page.
-2. Adjust **Name column** if the vertical divider after the names is not near the detected crop boundary.
-3. Press **Read timetable**.
-4. Review the debug overlay and warnings.
-5. Correct any OCR mistakes in the editable result.
-6. Copy or export the result.
-
-## Privacy
-
-The selected image is processed in the browser. The application itself does not upload the image to an application server. Tesseract.js, its worker, OCR core, and English language data are included in the `vendor` folder. No OCR CDN is required after deployment.
-
-## Important
-
-OCR can make mistakes. Verify generated schedules against the screenshot before relying on them.
+Use **Show alignment**. The first red line must pass through 16:00 and the last red line through 23:00. Change the percentages if necessary, then process again.

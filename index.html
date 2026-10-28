@@ -1,180 +1,24 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>ShiftReader</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ShiftReader</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#637083;--line:#d9dfeb;--accent:#2563eb;--accent2:#1d4ed8;--danger:#b42318;--warn:#9a6700;--ok:#067647;--shadow:0 12px 35px rgba(29,43,76,.09)}
-*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-header{background:linear-gradient(125deg,#172554,#1d4ed8);color:white;padding:30px 20px}header div,main{max-width:1180px;margin:auto}h1{margin:0 0 5px;font-size:clamp(28px,5vw,46px)}header p{margin:0;opacity:.88}.privacy{display:inline-block;margin-top:12px;padding:5px 10px;border:1px solid #ffffff55;border-radius:999px;font-size:13px}
-main{padding:22px 16px 50px}.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}h2{font-size:18px;margin:0 0 14px}.drop{min-height:190px;border:2px dashed #9aabd0;border-radius:13px;display:grid;place-items:center;text-align:center;padding:24px;background:#f8faff;cursor:pointer}.drop.drag{border-color:var(--accent);background:#eff6ff}.drop strong{display:block;font-size:18px}.drop input{display:none}.previewWrap{margin-top:15px;max-height:540px;overflow:auto;border-radius:10px;background:#e8edf6}.previewWrap img{display:block;max-width:100%;height:auto;margin:auto}.toolbar,.settings,.actions,.tabs{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.settings{margin:15px 0}.field{display:grid;gap:5px;flex:1;min-width:145px}.field label{font-size:12px;color:var(--muted);font-weight:700}.field input{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)}button,.fileButton{border:0;border-radius:9px;padding:10px 14px;font-weight:750;cursor:pointer;background:#e7ecf5;color:var(--text)}button.primary,.fileButton.primary{background:var(--accent);color:#fff}button:hover{filter:brightness(.97)}button:disabled{opacity:.5;cursor:not-allowed}.status{margin:12px 0;padding:11px;border-radius:9px;background:#eef2f8;color:var(--muted);white-space:pre-wrap}.status.ok{background:#ecfdf3;color:var(--ok)}.status.warn{background:#fffaeb;color:var(--warn)}.status.error{background:#fef3f2;color:var(--danger)}progress{width:100%;height:12px}.legend{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0;color:var(--muted);font-size:13px}.dot{width:12px;height:12px;display:inline-block;border-radius:3px;margin-right:5px}.debug{display:none;margin-top:14px;max-width:100%;height:auto;border:1px solid var(--line);background:#fff}.debug.show{display:block}textarea{width:100%;min-height:420px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);padding:12px;font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.tabs button.active{background:#dbeafe;color:#1d4ed8}.small{font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;font-weight:750}.diag{max-height:180px;overflow:auto;font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap}.count{font-weight:800;color:var(--accent)}@media(max-width:850px){.grid{grid-template-columns:1fr}textarea{min-height:300px}}@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#172033;--text:#edf2ff;--muted:#a9b4c7;--line:#344158;--shadow:none}.drop{background:#121c30}.previewWrap{background:#0b1220}.status{background:#202b40}.field input{background:#121c30}.tabs button.active{background:#19376e;color:#bfdbfe}}
-</style>
-</head>
-<body>
-<header><div><h1>ShiftReader</h1><p>Turn a color-coded break timetable screenshot into editable text.</p><span class="privacy">Local browser processing · no application upload</span></div></header>
-<main>
-<div class="grid">
-<section class="card">
-<h2>1. Add screenshot</h2>
-<label class="drop" id="drop"><input id="file" type="file" accept="image/png,image/jpeg,image/webp"><span><strong>Drop, paste, or choose a timetable</strong>Press Ctrl+V anywhere, or click to choose PNG, JPG, or WebP</span></label>
-<div class="previewWrap" id="previewWrap" hidden><img id="preview" alt="Timetable preview"></div>
-<div class="settings">
-<div class="field"><label for="namePct">Name column (% of width)</label><input id="namePct" type="number" min="8" max="30" step="0.5" value="15"></div>
-<div class="field"><label for="workWidth">Processing width (px)</label><input id="workWidth" type="number" min="1000" max="2600" step="100" value="1800"></div>
-<div class="field"><label for="colorTolerance">Color tolerance</label><input id="colorTolerance" type="number" min="35" max="150" value="92"></div>
-</div>
-<div class="legend"><span><i class="dot" style="background:#3b82f6"></i>Short</span><span><i class="dot" style="background:#f97316"></i>Meal</span><span><i class="dot" style="background:#22c55e"></i>WB20</span><span><i class="dot" style="background:#a855f7"></i>WB70</span></div>
-<div class="toolbar"><button class="primary" id="process" disabled>Read timetable</button><button id="cancel" disabled>Cancel</button><button id="debugToggle" disabled>Show detection overlay</button></div>
-<progress id="progress" max="1" value="0"></progress>
-<div class="status" id="status">Choose a screenshot to begin.</div>
-<canvas class="debug" id="debug"></canvas>
-<details><summary>Diagnostics</summary><div class="diag" id="diag">No run yet.</div></details>
-</section>
-<section class="card">
-<h2>2. Review result <span class="count" id="count"></span></h2>
-<div class="tabs"><button id="employeeTab" class="active">By employee</button><button id="timeTab">Chronological</button></div>
-<p class="small">OCR is imperfect. Compare the result with the screenshot and edit mistakes before exporting.</p>
-<textarea id="output" spellcheck="false" placeholder="Results will appear here..."></textarea>
-<div class="actions"><button class="primary" id="copy">Copy</button><button id="txt">TXT</button><button id="csv">CSV</button><button id="json">JSON</button></div>
-</section>
-</div>
-</main>
-<script src="./vendor/tesseract/tesseract.min.js"></script>
-<script>
-'use strict';
-const $=id=>document.getElementById(id);
-const state={img:null,fileName:'timetable',rows:[],cancel:false,view:'employee',log:[]};
-const refs=[
- {type:'Short',rgb:[59,130,246]}, {type:'Meal',rgb:[249,115,22]},
- {type:'WB20',rgb:[34,197,94]}, {type:'WB70',rgb:[168,85,247]}
-];
-function log(s){state.log.push(s);$('diag').textContent=state.log.join('\n');}
-function status(s,kind=''){$('status').textContent=s;$('status').className='status '+kind;}
-function setProgress(v){$('progress').value=Math.max(0,Math.min(1,v));}
-function saveSettings(){['namePct','workWidth','colorTolerance'].forEach(k=>localStorage.setItem('sr_'+k,$(k).value));}
-function loadSettings(){['namePct','workWidth','colorTolerance'].forEach(k=>{const v=localStorage.getItem('sr_'+k);if(v)$(k).value=v});}
-loadSettings();
-['namePct','workWidth','colorTolerance'].forEach(k=>$(k).addEventListener('change',saveSettings));
-$('drop').addEventListener('dragover',e=>{e.preventDefault();$('drop').classList.add('drag')});
-$('drop').addEventListener('dragleave',()=>$('drop').classList.remove('drag'));
-$('drop').addEventListener('drop',e=>{e.preventDefault();$('drop').classList.remove('drag');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
-$('file').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
-window.addEventListener('paste',e=>{
- const items=[...(e.clipboardData?.items||[])];
- const imageItem=items.find(item=>item.type.startsWith('image/'));
- if(!imageItem){
-  if(!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))status('Clipboard does not contain an image. Copy the screenshot itself, then press Ctrl+V.','warn');
-  return;
- }
- e.preventDefault();
- const file=imageItem.getAsFile();
- if(file){
-  const ext=(file.type.split('/')[1]||'png').replace('jpeg','jpg');
-  const pasted=new File([file],`pasted-timetable-${new Date().toISOString().replace(/[:.]/g,'-')}.${ext}`,{type:file.type});
-  loadFile(pasted);
-  status('Pasted screenshot loaded. Press Read timetable to process it.','ok');
- }
-});
-function loadFile(file){
- if(!file.type.startsWith('image/'))return status('That file is not a supported image.','error');
- state.fileName=file.name.replace(/\.[^.]+$/,'')||'timetable';
- const url=URL.createObjectURL(file), img=new Image();
- img.onload=()=>{state.img=img;$('preview').src=url;$('previewWrap').hidden=false;$('process').disabled=false;$('debugToggle').disabled=true;status(`Ready: ${file.name} · ${img.naturalWidth}×${img.naturalHeight}`,'ok');};
- img.onerror=()=>status('The image could not be opened.','error');img.src=url;
-}
-function nearestType(r,g,b,tol){let best=null,dist=Infinity;for(const ref of refs){const d=Math.hypot(r-ref.rgb[0],g-ref.rgb[1],b-ref.rgb[2]);if(d<dist){dist=d;best=ref}}return dist<=tol?best.type:null}
-function detectBoxes(canvas){
- const ctx=canvas.getContext('2d',{willReadFrequently:true}),w=canvas.width,h=canvas.height,data=ctx.getImageData(0,0,w,h).data;
- const step=3,gw=Math.ceil(w/step),gh=Math.ceil(h/step),mask=new Uint8Array(gw*gh),types=new Array(gw*gh),tol=+$('colorTolerance').value;
- for(let gy=0;gy<gh;gy++)for(let gx=0;gx<gw;gx++){const x=Math.min(w-1,gx*step),y=Math.min(h-1,gy*step),i=(y*w+x)*4;const t=nearestType(data[i],data[i+1],data[i+2],tol);if(t){mask[gy*gw+gx]=1;types[gy*gw+gx]=t}}
- const seen=new Uint8Array(mask.length),components=[];
- for(let i=0;i<mask.length;i++)if(mask[i]&&!seen[i]){
-  const q=[i];seen[i]=1;let qi=0,minx=1e9,miny=1e9,maxx=0,maxy=0,count=0,votes={};
-  while(qi<q.length){const p=q[qi++],x=p%gw,y=(p/gw)|0;count++;minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);votes[types[p]]=(votes[types[p]]||0)+1;
-   for(const n of [p-1,p+1,p-gw,p+gw]){if(n>=0&&n<mask.length&&!seen[n]&&mask[n]&&Math.abs((n%gw)-x)<=1){seen[n]=1;q.push(n)}}}
-  const bw=(maxx-minx+1)*step,bh=(maxy-miny+1)*step;
-  if(count>35&&bw>28&&bh>13&&bw<w*.22&&bh<h*.08){const type=Object.entries(votes).sort((a,b)=>b[1]-a[1])[0][0];components.push({x:minx*step,y:miny*step,w:bw,h:bh,type});}
- }
- // Exclude title legend and merge overlapping fragments.
- let boxes=components.filter(b=>b.y>h*.075&&b.x>w*.12);
- boxes.sort((a,b)=>a.y-b.y||a.x-b.x);
- const merged=[];
- for(const b of boxes){const m=merged.find(x=>x.type===b.type&&Math.abs((x.y+x.h/2)-(b.y+b.h/2))<Math.max(x.h,b.h)*.55&&b.x<=x.x+x.w+8&&b.x+b.w>=x.x-8);if(m){const x2=Math.max(m.x+m.w,b.x+b.w),y2=Math.max(m.y+m.h,b.y+b.h);m.x=Math.min(m.x,b.x);m.y=Math.min(m.y,b.y);m.w=x2-m.x;m.h=y2-m.y}else merged.push({...b})}
- return merged;
-}
-function groupRows(boxes,h){
- const sorted=[...boxes].sort((a,b)=>(a.y+a.h/2)-(b.y+b.h/2)),groups=[];
- for(const b of sorted){const cy=b.y+b.h/2;let g=groups.find(r=>Math.abs(r.y-cy)<Math.max(10,h*.012));if(!g){g={y:cy,boxes:[]};groups.push(g)}g.boxes.push(b);g.y=g.boxes.reduce((s,x)=>s+x.y+x.h/2,0)/g.boxes.length}
- return groups.sort((a,b)=>a.y-b.y);
-}
-function cropCanvas(src,x,y,w,h,scale=2){const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*scale));c.height=Math.max(1,Math.round(h*scale));const cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);cx.imageSmoothingEnabled=true;cx.drawImage(src,x,y,w,h,0,0,c.width,c.height);return c}
-function normalizeTime(text){
- let s=(text||'').replace(/[Oo]/g,'0').replace(/[Il|]/g,'1').replace(/[—–]/g,'-').replace(/\s+/g,' ');
- const hits=[...s.matchAll(/([0-2]?\d)\s*[:.]\s*([0-5]\d)/g)].map(m=>String(+m[1]).padStart(2,'0')+':'+m[2]);
- if(hits.length>=2)return hits[0]+'-'+hits[1];
- const compact=[...s.matchAll(/\b([0-2]\d)([0-5]\d)\b/g)].map(m=>m[1]+':'+m[2]);
- return compact.length>=2?compact[0]+'-'+compact[1]:(hits[0]||compact[0]||'??:??-??:??');
-}
-async function recognize(worker,canvas,params={}){const r=await worker.recognize(canvas,params);return r.data}
-async function processImage(){
- if(!state.img)return; if(!window.Tesseract)return status('The local OCR library did not load. Check that the vendor folder was uploaded unchanged.','error');
- state.cancel=false;state.log=[];$('process').disabled=true;$('cancel').disabled=false;setProgress(.01);status('Preparing image…');
- try{
-  const maxW=Math.max(1000,Math.min(2600,+$('workWidth').value||1800)),scale=Math.min(1,maxW/state.img.naturalWidth),w=Math.round(state.img.naturalWidth*scale),h=Math.round(state.img.naturalHeight*scale);
-  const work=document.createElement('canvas');work.width=w;work.height=h;work.getContext('2d').drawImage(state.img,0,0,w,h);log(`Working image: ${w}x${h}, scale ${scale.toFixed(3)}`);
-  status('Detecting colored break boxes…');const boxes=detectBoxes(work),groups=groupRows(boxes,h);log(`Detected boxes: ${boxes.length}`);log(`Detected rows: ${groups.length}`);if(!boxes.length)throw new Error('No colored break boxes were detected. Try increasing Color tolerance.');
-  drawDebug(work,groups);$('debugToggle').disabled=false;setProgress(.12);
-  status('Loading OCR engine… First run can take longer.');
-  const worker=await Tesseract.createWorker('eng',1,{
-   workerPath:'./vendor/tesseract/worker.min.js',
-   corePath:'./vendor/tesseract/',
-   langPath:'./vendor/tessdata/',
-   gzip:true,
-   logger:m=>{if(m.progress!=null)setProgress(.12+m.progress*.13)}
-  });
-  if(state.cancel){await worker.terminate();throw new Error('Cancelled');}
-  const nameW=Math.round(w*(+$('namePct').value/100)),rowGap=groups.length>1?groups.slice(1).reduce((s,r,i)=>s+(r.y-groups[i].y),0)/(groups.length-1):h*.04;
-  state.rows=[];
-  for(let ri=0;ri<groups.length;ri++){
-   if(state.cancel){await worker.terminate();throw new Error('Cancelled');}
-   const row=groups[ri],top=Math.max(0,row.y-rowGap*.43),rh=Math.min(h-top,rowGap*.86);
-   status(`Reading employee ${ri+1} of ${groups.length}…`);
-   const nameData=await recognize(worker,cropCanvas(work,0,top,nameW,rh,2.4),{tessedit_pageseg_mode:'7'});
-   let name=(nameData.text||'').replace(/[^\p{L}\p{M}'’ -]/gu,' ').replace(/\s+/g,' ').trim();
-   if(name.length<2)name=`Employee ${String(ri+1).padStart(2,'0')}`;
-   const breaks=[];
-   row.boxes.sort((a,b)=>a.x-b.x);
-   for(const b of row.boxes){
-    const pad=3,crop=cropCanvas(work,Math.max(0,b.x-pad),Math.max(0,b.y-pad),Math.min(w-b.x+pad,b.w+pad*2),Math.min(h-b.y+pad,b.h+pad*2),2.4);
-    const d=await recognize(worker,crop,{tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789:-.'});
-    breaks.push({startEnd:normalizeTime(d.text),type:b.type,raw:(d.text||'').trim(),x:b.x});
-   }
-   state.rows.push({name,breaks,y:row.y,confidence:Math.round(nameData.confidence||0)});
-   setProgress(.25+.72*((ri+1)/groups.length));
-  }
-  await worker.terminate();renderOutput();setProgress(1);status(`Finished. Found ${state.rows.length} employees and ${state.rows.reduce((s,r)=>s+r.breaks.length,0)} breaks. Verify OCR before use.`,'ok');
-  log('OCR complete. Unknown times are marked with question marks.');
- }catch(e){status(e.message==='Cancelled'?'Processing cancelled.':`Could not finish: ${e.message}`,'error');log(String(e.stack||e));}
- finally{$('process').disabled=false;$('cancel').disabled=true}
-}
-function drawDebug(src,groups){const c=$('debug');c.width=src.width;c.height=src.height;const x=c.getContext('2d');x.drawImage(src,0,0);x.lineWidth=Math.max(2,src.width/800);x.font=`${Math.max(12,src.width/100)}px sans-serif`;groups.forEach((r,i)=>{r.boxes.forEach(b=>{x.strokeStyle=b.type==='Short'?'#001cff':b.type==='Meal'?'#b62500':b.type==='WB20'?'#006b31':'#6512b8';x.strokeRect(b.x,b.y,b.w,b.h)});x.fillStyle='#111';x.fillText(String(i+1),4,r.y)});}
-function renderOutput(){
- let text='';
- if(state.view==='employee')text=state.rows.map(r=>`${r.name}\n${r.breaks.map(b=>`${b.startEnd} ${b.type}`).join('\n')}`).join('\n\n');
- else {const all=[];state.rows.forEach(r=>r.breaks.forEach(b=>all.push({name:r.name,...b})));all.sort((a,b)=>a.startEnd.localeCompare(b.startEnd));const groups={};all.forEach(b=>(groups[b.startEnd.split('-')[0]]??=[]).push(b));text=Object.entries(groups).map(([t,bs])=>`${t}\n${bs.map(b=>`${b.name} - ${b.type} (${b.startEnd})`).join('\n')}`).join('\n\n')}
- $('output').value=text;$('count').textContent=state.rows.length?`(${state.rows.length})`:'';
-}
-$('process').addEventListener('click',processImage);$('cancel').addEventListener('click',()=>{state.cancel=true;status('Cancelling after the current OCR step…','warn')});
-$('debugToggle').addEventListener('click',()=>{const show=$('debug').classList.toggle('show');$('debugToggle').textContent=show?'Hide detection overlay':'Show detection overlay'});
-$('employeeTab').addEventListener('click',()=>{state.view='employee';$('employeeTab').classList.add('active');$('timeTab').classList.remove('active');renderOutput()});
-$('timeTab').addEventListener('click',()=>{state.view='time';$('timeTab').classList.add('active');$('employeeTab').classList.remove('active');renderOutput()});
-$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('output').value);status('Result copied.','ok')}catch{ $('output').select();document.execCommand('copy')}});
-function download(name,type,data){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-$('txt').addEventListener('click',()=>download(state.fileName+'-breaks.txt','text/plain;charset=utf-8',$('output').value));
-$('json').addEventListener('click',()=>download(state.fileName+'-breaks.json','application/json',JSON.stringify(state.rows,null,2)));
-$('csv').addEventListener('click',()=>{const q=v=>'"'+String(v).replaceAll('"','""')+'"';const lines=['Name,Start,End,Type'];state.rows.forEach(r=>r.breaks.forEach(b=>{const [s,e]=b.startEnd.split('-');lines.push([r.name,s,e,b.type].map(q).join(','))}));download(state.fileName+'-breaks.csv','text/csv;charset=utf-8','\ufeff'+lines.join('\n'))});
-</script>
-</body>
-</html>
+:root{--b:#0f172a;--c:#fff;--m:#64748b;--l:#dbe2ec;--a:#2563eb;--bg:#f3f6fb;--ok:#067647;--err:#b42318}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--b);font:15px/1.45 system-ui,Segoe UI,sans-serif}header{padding:25px;background:linear-gradient(120deg,#172554,#2563eb);color:#fff}header>div,main{max-width:1200px;margin:auto}h1{margin:0}header p{margin:4px 0 0;opacity:.9}main{padding:20px}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.card{background:var(--c);border:1px solid var(--l);border-radius:16px;padding:18px;box-shadow:0 10px 28px #1e293b12}.drop{display:grid;place-items:center;text-align:center;min-height:145px;border:2px dashed #94a3b8;border-radius:12px;background:#f8fafc;cursor:pointer}.drop input{display:none}.drop strong{display:block;font-size:18px}.preview{max-height:440px;overflow:auto;margin-top:12px;background:#e2e8f0}.preview img{display:block;max-width:100%;margin:auto}.controls,.actions{display:flex;flex-wrap:wrap;gap:9px;margin:13px 0}.field{display:grid;gap:4px;min-width:125px;flex:1}.field label{font-size:12px;font-weight:700;color:var(--m)}input{padding:8px;border:1px solid var(--l);border-radius:8px}button{padding:10px 13px;border:0;border-radius:9px;font-weight:750;cursor:pointer}button.primary{background:var(--a);color:#fff}button:disabled{opacity:.5}.status{padding:10px;border-radius:9px;background:#eef2f6;white-space:pre-wrap}.status.ok{background:#ecfdf3;color:var(--ok)}.status.err{background:#fef3f2;color:var(--err)}progress{width:100%}textarea{width:100%;min-height:500px;padding:12px;border:1px solid var(--l);border-radius:10px;font:14px/1.55 ui-monospace,Consolas,monospace}.debug{display:none;max-width:100%;margin-top:12px;border:1px solid var(--l)}.debug.show{display:block}.note{font-size:13px;color:var(--m)}@media(max-width:850px){.grid{grid-template-columns:1fr}textarea{min-height:320px}}
+</style></head><body><header><div><h1>ShiftReader v2</h1><p>Position-based timetable reader. OCR is used for names only, not times.</p></div></header><main><div class="grid">
+<section class="card"><h2>Screenshot</h2><label class="drop" id="drop"><input id="file" type="file" accept="image/*"><span><strong>Paste, drop, or choose image</strong>Press Ctrl+V anywhere</span></label><div class="preview" id="pw" hidden><img id="preview"></div>
+<div class="controls"><div class="field"><label>16:00 grid line (%)</label><input id="startPct" type="number" value="15.35" step="0.05"></div><div class="field"><label>23:00 grid line (%)</label><input id="endPct" type="number" value="92.75" step="0.05"></div><div class="field"><label>Name area (%)</label><input id="namePct" type="number" value="15" step="0.5"></div><div class="field"><label>Color tolerance</label><input id="tol" type="number" value="100"></div></div>
+<div class="actions"><button id="read" class="primary" disabled>Read timetable</button><button id="overlay" disabled>Show alignment</button></div><progress id="prog" value="0" max="1"></progress><div class="status" id="status">Add a screenshot.</div><canvas id="debug" class="debug"></canvas>
+<p class="note"><b>Why this is more accurate:</b> break times are calculated from horizontal chart position and snapped to five minutes. The app no longer tries to OCR tiny white time labels.</p></section>
+<section class="card"><h2>Result</h2><p class="note">Names remain editable. Break times should now be deterministic for this chart layout.</p><textarea id="out" spellcheck="false"></textarea><div class="actions"><button id="copy" class="primary">Copy</button><button id="txt">TXT</button><button id="csv">CSV</button></div></section>
+</div></main><script src="./vendor/tesseract/tesseract.min.js"></script><script>
+'use strict';const $=x=>document.getElementById(x);const S={img:null,rows:[],name:'timetable'};
+const TYPES=[{type:'Short',rgb:[59,130,246],mins:15},{type:'Meal',rgb:[249,115,22],mins:30},{type:'WB20',rgb:[34,197,94],mins:20},{type:'WB70',rgb:[168,85,247],mins:70}];
+function msg(t,k=''){$('status').textContent=t;$('status').className='status '+k}function load(f){if(!f?.type.startsWith('image/'))return;S.name=f.name.replace(/\.[^.]+$/,'');const u=URL.createObjectURL(f),im=new Image;im.onload=()=>{S.img=im;$('preview').src=u;$('pw').hidden=false;$('read').disabled=false;msg(`Ready: ${im.width} x ${im.height}`,'ok')};im.src=u}
+$('file').onchange=e=>load(e.target.files[0]);$('drop').ondragover=e=>e.preventDefault();$('drop').ondrop=e=>{e.preventDefault();load(e.dataTransfer.files[0])};addEventListener('paste',e=>{const i=[...(e.clipboardData?.items||[])].find(x=>x.type.startsWith('image/'));if(i){e.preventDefault();load(i.getAsFile())}});
+function near(r,g,b,tol){let best=null,d=1e9;for(const x of TYPES){const q=Math.hypot(r-x.rgb[0],g-x.rgb[1],b-x.rgb[2]);if(q<d){d=q;best=x}}return d<=tol?best:null}
+function boxes(c){const x=c.getContext('2d',{willReadFrequently:true}),w=c.width,h=c.height,d=x.getImageData(0,0,w,h).data,step=3,gw=Math.ceil(w/step),gh=Math.ceil(h/step),m=new Uint8Array(gw*gh),ty=[];for(let y=0;y<gh;y++)for(let xx=0;xx<gw;xx++){const p=(Math.min(h-1,y*step)*w+Math.min(w-1,xx*step))*4,t=near(d[p],d[p+1],d[p+2],+$('tol').value);if(t){m[y*gw+xx]=1;ty[y*gw+xx]=t}}const seen=new Uint8Array(m.length),out=[];for(let i=0;i<m.length;i++)if(m[i]&&!seen[i]){let q=[i],j=0,minx=1e9,miny=1e9,maxx=0,maxy=0,n=0,v={};seen[i]=1;while(j<q.length){const p=q[j++],xx=p%gw,y=p/gw|0;n++;minx=Math.min(minx,xx);maxx=Math.max(maxx,xx);miny=Math.min(miny,y);maxy=Math.max(maxy,y);v[ty[p].type]=(v[ty[p].type]||0)+1;for(const z of [p-1,p+1,p-gw,p+gw])if(z>=0&&z<m.length&&!seen[z]&&m[z]&&Math.abs(z%gw-xx)<=1){seen[z]=1;q.push(z)}}const bw=(maxx-minx+1)*step,bh=(maxy-miny+1)*step;if(n>30&&bw>25&&bh>12&&bw<w*.2&&bh<h*.07){const type=Object.keys(v).sort((a,b)=>v[b]-v[a])[0];out.push({x:minx*step,y:miny*step,w:bw,h:bh,type})}}return out.filter(b=>b.y>h*.08&&b.x>w*.13)}
+function groups(bs,h){const a=[];for(const b of bs.sort((p,q)=>p.y-q.y)){const cy=b.y+b.h/2;let r=a.find(x=>Math.abs(x.y-cy)<Math.max(8,h*.009));if(!r){r={y:cy,boxes:[]};a.push(r)}r.boxes.push(b);r.y=r.boxes.reduce((s,z)=>s+z.y+z.h/2,0)/r.boxes.length}return a.sort((x,y)=>x.y-y.y)}
+function hhmm(min){min=((min%1440)+1440)%1440;return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0')}function snap5(n){return Math.round(n/5)*5}
+function calc(b,w){const x0=w*(+$('startPct').value/100),x1=w*(+$('endPct').value/100),pxPerMin=(x1-x0)/(7*60),start=snap5(16*60+(b.x-x0)/pxPerMin),def=TYPES.find(x=>x.type===b.type);return {start,end:start+def.mins,type:b.type}}
+function crop(src,x,y,w,h,scale=3){const c=document.createElement('canvas');c.width=Math.round(w*scale);c.height=Math.round(h*scale);const z=c.getContext('2d');z.fillStyle='#fff';z.fillRect(0,0,c.width,c.height);z.drawImage(src,x,y,w,h,0,0,c.width,c.height);return c}
+async function run(){if(!S.img)return;if(!window.Tesseract)return msg('Local OCR files are missing. Upload the entire vendor folder.','err');$('read').disabled=true;try{const w=Math.min(2200,S.img.width),sc=w/S.img.width,h=Math.round(S.img.height*sc),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(S.img,0,0,w,h);msg('Detecting break blocks...');const rs=groups(boxes(c),h);if(rs.length<2)throw Error('Too few rows detected. Try Color tolerance 120.');draw(c,rs);msg(`Detected ${rs.length} rows. Loading Turkish + English name OCR...`);const worker=await Tesseract.createWorker('tur+eng',1,{workerPath:'./vendor/tesseract/worker.min.js',corePath:'./vendor/tesseract/',langPath:'./vendor/tessdata/',gzip:true,logger:m=>{if(m.progress!=null)$('prog').value=m.progress*.2}});const gap=rs.length>1?rs.slice(1).reduce((s,r,i)=>s+r.y-rs[i].y,0)/(rs.length-1):40, nameW=w*(+$('namePct').value/100);S.rows=[];for(let i=0;i<rs.length;i++){msg(`Reading name ${i+1}/${rs.length}...`);const top=Math.max(0,rs[i].y-gap*.42),data=await worker.recognize(crop(c,0,top,nameW,gap*.84),{tessedit_pageseg_mode:'7'});let name=(data.data.text||'').replace(/[^\p{L}\p{M}'’ -]/gu,' ').replace(/\s+/g,' ').trim();if(name.length<2)name=`Employee ${String(i+1).padStart(2,'0')}`;const br=rs[i].boxes.sort((a,b)=>a.x-b.x).map(b=>calc(b,w));S.rows.push({name,breaks:br});$('prog').value=.2+.8*(i+1)/rs.length}await worker.terminate();render();msg(`Finished: ${S.rows.length} employees, ${S.rows.reduce((s,r)=>s+r.breaks.length,0)} breaks.`,'ok')}catch(e){msg(e.message,'err')}finally{$('read').disabled=false}}
+function draw(c,rs){const d=$('debug');d.width=c.width;d.height=c.height;const x=d.getContext('2d');x.drawImage(c,0,0);const x0=d.width*(+$('startPct').value/100),x1=d.width*(+$('endPct').value/100);x.lineWidth=2;for(let i=0;i<=7;i++){const xx=x0+(x1-x0)*i/7;x.strokeStyle=i===0||i===7?'#ef4444':'#f59e0b';x.beginPath();x.moveTo(xx,0);x.lineTo(xx,d.height);x.stroke();x.fillStyle='#111';x.fillText(`${16+i}:00`,xx+3,20)}for(const r of rs)for(const b of r.boxes){x.strokeStyle='#00ffff';x.strokeRect(b.x,b.y,b.w,b.h)}}function render(){$('out').value=S.rows.map(r=>r.name+'\n'+r.breaks.map(b=>`${hhmm(b.start)}-${hhmm(b.end)} ${b.type}`).join('\n')).join('\n\n')}
+$('read').onclick=run;$('overlay').onclick=()=>{$('debug').classList.toggle('show')};new MutationObserver(()=>$('overlay').disabled=!$('debug').width).observe($('debug'),{attributes:true});$('copy').onclick=()=>navigator.clipboard.writeText($('out').value);function dl(n,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t]));a.download=n;a.click()}$('txt').onclick=()=>dl(S.name+'-breaks.txt',$('out').value);$('csv').onclick=()=>{let a=['Name,Start,End,Type'];S.rows.forEach(r=>r.breaks.forEach(b=>a.push([r.name,hhmm(b.start),hhmm(b.end),b.type].map(x=>'"'+String(x).replaceAll('"','""')+'"').join(','))));dl(S.name+'-breaks.csv','\ufeff'+a.join('\n'))};
+</script></body></html>
