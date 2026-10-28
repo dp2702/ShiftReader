@@ -4,7 +4,7 @@ A browser-only GitHub Pages tool that converts a color-coded shift timetable scr
 
 ## Quick start
 
-1. Upload `index.html`, `plan.md`, and `README.md` to the repository root.
+1. Upload `index.html`, `plan.md`, `README.md`, and the complete `vendor` folder to the repository root.
 2. In GitHub, open **Settings → Pages**.
 3. Under **Build and deployment**, select **Deploy from a branch**.
 4. Select the branch and `/ (root)`, then save.
@@ -12,7 +12,7 @@ A browser-only GitHub Pages tool that converts a color-coded shift timetable scr
 
 ## How to use
 
-1. Choose or drop a screenshot.
+1. Choose, drop, or paste a screenshot. To paste, copy the image and press **Ctrl+V** anywhere on the page.
 2. Adjust **Name column** if the vertical divider after the names is not near the detected crop boundary.
 3. Press **Read timetable**.
 4. Review the debug overlay and warnings.
@@ -21,7 +21,7 @@ A browser-only GitHub Pages tool that converts a color-coded shift timetable scr
 
 ## Privacy
 
-The selected image is processed in the browser. The application itself does not upload the image to an application server. The starter loads Tesseract.js from jsDelivr; see `plan.md` for the later vendoring option.
+The selected image is processed in the browser. The application itself does not upload the image to an application server. Tesseract.js, its worker, OCR core, and English language data are included in the `vendor` folder. No OCR CDN is required after deployment.
 
 ## Important
 

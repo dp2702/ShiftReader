@@ -55,7 +55,7 @@ Targeted OCR should be faster and more reliable than processing the complete scr
 
 The initial project includes:
 
-- drag-and-drop or file-picker upload;
+- drag-and-drop, clipboard paste, or file-picker input;
 - image preview;
 - configurable name-column width;
 - configurable OCR processing width;
@@ -120,7 +120,7 @@ The browser must not silently present uncertain OCR as correct. The interface th
 - OCR is not guaranteed to be exact. Users must verify results before operational use.
 - The initial detector assumes a white/light background and colors close to the supplied chart.
 - Screenshots with a substantially different theme or layout require calibration.
-- Tesseract.js is loaded from a CDN in the starter version, so the first use requires access to that CDN. A later release can vendor the required files in the repository.
+- Tesseract.js, the worker, OCR core, and English language data are stored in the repository under `vendor`, avoiding runtime CDN access.
 - Very large screenshots can use significant memory. ShiftReader scales them before analysis.
 - Names may be the hardest OCR target because the text is smaller than the time text.
 
@@ -130,7 +130,10 @@ The browser must not silently present uncertain OCR as correct. The interface th
 ShiftReader/
 ├── index.html
 ├── plan.md
-└── README.md
+├── README.md
+└── vendor/
+    ├── tesseract/
+    └── tessdata/
 ```
 
 The starter deliberately uses one HTML file so it is easy to upload, inspect, and host on GitHub Pages.
@@ -139,7 +142,7 @@ The starter deliberately uses one HTML file so it is easy to upload, inspect, an
 
 The MVP is successful when it can:
 
-1. Open the supplied timetable screenshot.
+1. Open, drop, or paste the supplied timetable screenshot.
 2. Detect most colored break boxes without detecting the legend.
 3. Assign detected boxes to the correct horizontal employee rows.
 4. Classify the four break types correctly.
@@ -154,4 +157,4 @@ The MVP is successful when it can:
 3. Test with the original full-resolution screenshot.
 4. Use the debug overlay and diagnostics to identify misses.
 5. Tune color thresholds, minimum component size, name-column width, and row grouping from real results.
-6. Vendor Tesseract assets if the target network blocks the CDN.
+6. Keep the complete `vendor` directory and its paths unchanged when uploading.

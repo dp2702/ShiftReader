@@ -41,7 +41,7 @@ main{padding:22px 16px 50px}.grid{display:grid;grid-template-columns:minmax(0,1.
 </section>
 </div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="./vendor/tesseract/tesseract.min.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -119,7 +119,7 @@ function normalizeTime(text){
 }
 async function recognize(worker,canvas,params={}){const r=await worker.recognize(canvas,params);return r.data}
 async function processImage(){
- if(!state.img)return; if(!window.Tesseract)return status('Tesseract.js did not load. The CDN may be blocked.','error');
+ if(!state.img)return; if(!window.Tesseract)return status('The local OCR library did not load. Check that the vendor folder was uploaded unchanged.','error');
  state.cancel=false;state.log=[];$('process').disabled=true;$('cancel').disabled=false;setProgress(.01);status('Preparing image…');
  try{
   const maxW=Math.max(1000,Math.min(2600,+$('workWidth').value||1800)),scale=Math.min(1,maxW/state.img.naturalWidth),w=Math.round(state.img.naturalWidth*scale),h=Math.round(state.img.naturalHeight*scale);
@@ -127,7 +127,13 @@ async function processImage(){
   status('Detecting colored break boxes…');const boxes=detectBoxes(work),groups=groupRows(boxes,h);log(`Detected boxes: ${boxes.length}`);log(`Detected rows: ${groups.length}`);if(!boxes.length)throw new Error('No colored break boxes were detected. Try increasing Color tolerance.');
   drawDebug(work,groups);$('debugToggle').disabled=false;setProgress(.12);
   status('Loading OCR engine… First run can take longer.');
-  const worker=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.progress!=null)setProgress(.12+m.progress*.13)}});
+  const worker=await Tesseract.createWorker('eng',1,{
+   workerPath:'./vendor/tesseract/worker.min.js',
+   corePath:'./vendor/tesseract/',
+   langPath:'./vendor/tessdata/',
+   gzip:true,
+   logger:m=>{if(m.progress!=null)setProgress(.12+m.progress*.13)}
+  });
   if(state.cancel){await worker.terminate();throw new Error('Cancelled');}
   const nameW=Math.round(w*(+$('namePct').value/100)),rowGap=groups.length>1?groups.slice(1).reduce((s,r,i)=>s+(r.y-groups[i].y),0)/(groups.length-1):h*.04;
   state.rows=[];
