@@ -9,3 +9,110 @@ html{scroll-behavior:smooth}body{min-height:100vh}header{position:sticky;top:0;z
 @media(max-width:1050px){.grid{grid-template-columns:1fr}.resultHead{top:64px}.preview{max-height:42vh}.sr-timetable{max-height:64vh}}
 @media(max-width:700px){header{position:relative}.resultHead{position:relative;top:auto}.card{border-radius:12px}.actions{display:grid;grid-template-columns:1fr 1fr}.actions .primary{grid-column:1/-1}.sr-head,.sr-row{grid-template-columns:170px 1fr 1fr 100px 90px 90px}.#ocrModePanel.sr-ocr-panel{padding:16px 12px}} 
 @media(max-width:430px){main{padding:8px}.card{padding:12px}.drop{min-height:105px}.actions{grid-template-columns:1fr}.actions .primary{grid-column:auto}.sr-head,.sr-row{grid-template-columns:170px 1fr;}.sr-head>div:nth-child(n+2),.sr-row>div:nth-child(n+2){display:none}#ocrModePanel .sr-ocr-option{padding:10px 12px}}
+/* =========================================================
+   FIX: responsive schedule timeline and readable time header
+   ========================================================= */
+
+.schedule-table,
+.schedule-table * {
+  box-sizing: border-box;
+}
+
+/* Allow the schedule to use the complete available width */
+.schedule-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+/* Header and employee rows must use exactly the same columns */
+.schedule-header,
+.schedule-row,
+.employee-row {
+  display: grid !important;
+  grid-template-columns: 180px minmax(620px, 1fr) !important;
+  width: 100% !important;
+  min-width: 800px;
+}
+
+/* Fixed employee-information column */
+.schedule-header > :first-child,
+.schedule-row > :first-child,
+.employee-row > :first-child {
+  width: auto !important;
+  min-width: 0;
+}
+
+/* Timeline must not retain the detected screenshot width */
+.schedule-timeline,
+.timeline,
+.timeline-track,
+.timeline-header,
+.time-axis,
+.breaks-timeline {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+/* Ten evenly spaced time positions: 15:30 through 00:30 */
+.timeline-header,
+.time-axis {
+  display: grid !important;
+  grid-template-columns: repeat(10, minmax(62px, 1fr)) !important;
+  align-items: center;
+  overflow: visible;
+}
+
+.timeline-header > *,
+.time-axis > * {
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Break area follows the same responsive width */
+.timeline-track,
+.breaks-timeline {
+  position: relative;
+  overflow: visible;
+}
+
+/* Prevent break labels from becoming unreadably narrow */
+.break-block,
+.break-card,
+.timeline-break {
+  min-width: 48px;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Only the timetable area should scroll on narrow screens */
+.schedule-table-wrapper,
+.schedule-wrapper,
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+/* Mobile layout */
+@media (max-width: 860px) {
+  .schedule-header,
+  .schedule-row,
+  .employee-row {
+    grid-template-columns: 155px 650px !important;
+    min-width: 805px;
+  }
+
+  .timeline-header,
+  .time-axis {
+    grid-template-columns: repeat(10, 65px) !important;
+  }
+}
