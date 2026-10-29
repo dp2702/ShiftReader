@@ -1,0 +1,7 @@
+{
+  "name": "shiftreader-paddleocr-browser",
+  "private": true,
+  "type": "module",
+  "scripts": {"build": "node scripts/build.mjs"},
+  "dependencies": {"@paddleocr/paddleocr-js": "latest", "esbuild": "latest", "onnxruntime-web": "latest"}
+}
