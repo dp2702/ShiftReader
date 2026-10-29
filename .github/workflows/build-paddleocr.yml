@@ -1,41 +1,57 @@
 name: Build PaddleOCR browser assets
+
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - package.json
-      - scripts/build.mjs
-      - .github/workflows/build-paddleocr.yml
+
 permissions:
   contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js without dependency cache
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm install
-      - run: npm run build
+          package-manager-cache: false
+
+      - name: Install dependencies and create lock file
+        run: npm install --package-lock
+
+      - name: Build browser bundle
+        run: npm run build
+
       - name: Download PP-OCRv6 medium ONNX files
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p vendor/paddleocr/models/det vendor/paddleocr/models/rec
-          base=https://huggingface.co/PaddlePaddle
+          base="https://huggingface.co/PaddlePaddle"
+
           curl -fL "$base/PP-OCRv6_medium_det_onnx/resolve/main/inference.onnx?download=true" -o vendor/paddleocr/models/det/inference.onnx
           curl -fL "$base/PP-OCRv6_medium_det_onnx/resolve/main/inference.yml?download=true" -o vendor/paddleocr/models/det/inference.yml
           curl -fL "$base/PP-OCRv6_medium_rec_onnx/resolve/main/inference.onnx?download=true" -o vendor/paddleocr/models/rec/inference.onnx
           curl -fL "$base/PP-OCRv6_medium_rec_onnx/resolve/main/inference.yml?download=true" -o vendor/paddleocr/models/rec/inference.yml
+
           tar --format=ustar -cf vendor/paddleocr/PP-OCRv6_medium_det.tar -C vendor/paddleocr/models/det inference.onnx inference.yml
           tar --format=ustar -cf vendor/paddleocr/PP-OCRv6_medium_rec.tar -C vendor/paddleocr/models/rec inference.onnx inference.yml
           rm -rf vendor/paddleocr/models
+
       - name: Commit generated assets
+        shell: bash
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add vendor/paddleocr
-          git diff --cached --quiet || git commit -m "Build PP-OCRv6 medium browser assets"
-          git push
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json vendor/paddleocr
+          if git diff --cached --quiet; then
+            echo "No generated files changed."
+          else
+            git commit -m "Build PP-OCRv6 medium browser assets"
+            git push
+          fi
