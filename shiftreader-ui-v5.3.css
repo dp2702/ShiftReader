@@ -28,3 +28,22 @@ button.danger,
 button.auto,
 button[type="button"],
 button[type="submit"]{display:inline-flex;align-items:center;justify-content:center;text-align:center;margin-inline:auto}
+
+/* Center OCR choice rows and keep the radio + label vertically aligned */
+.ocr-mode,
+.ocr-mode .mode-options,
+.ocr-mode label,
+.ocr-option,
+.ocr-option label,
+label[for*="ocr"],
+input[type="radio"] + label{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:nowrap}
+.ocr-mode{width:100%;max-width:680px;margin:0 auto;flex-direction:column}
+.ocr-mode .mode-options{flex-direction:column;align-items:center;gap:12px;width:100%}
+.ocr-mode label,
+.ocr-option,
+.ocr-option label,
+label[for*="ocr"],
+input[type="radio"] + label{width:fit-content;max-width:100%;margin:0 auto;text-align:left}
+.ocr-mode input[type="radio"],
+.ocr-option input[type="radio"],
+input[type="radio"]{margin:0;flex:0 0 auto;accent-color:#60a5fa}
