@@ -1,0 +1,57 @@
+/* ShiftReader adaptive layout v5.6
+   Before extraction: balanced screenshot/table columns.
+   After timetable rows exist: screenshot 20%, schedule 80%.
+   Layout only. No timetable, OCR, alarm, or element styling is changed. */
+
+@media (min-width: 1051px) {
+  header > div,
+  main {
+    width: min(100% - 32px, 1600px) !important;
+    max-width: 1600px !important;
+  }
+
+  main > .grid {
+    display: grid !important;
+    grid-template-columns: minmax(360px, 0.72fr) minmax(620px, 1.28fr) !important;
+    align-items: start !important;
+    gap: 18px !important;
+    transition: grid-template-columns .28s ease;
+  }
+
+  main > .grid > .card {
+    min-width: 0 !important;
+  }
+
+  main > .grid > .card:nth-child(2),
+  main > .grid > .card:nth-child(2) .sr-timetable {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* The addon creates direct .sr-row children only after a timetable is rendered. */
+  body:has(#srTimetable > .sr-row) main > .grid {
+    grid-template-columns: minmax(260px, 20%) minmax(0, 80%) !important;
+  }
+
+  body:has(#srTimetable > .sr-row) main > .grid > .card:first-child {
+    min-width: 0 !important;
+  }
+}
+
+@media (min-width: 1051px) and (max-width: 1250px) {
+  main > .grid {
+    grid-template-columns: minmax(330px, .8fr) minmax(560px, 1.2fr) !important;
+  }
+
+  body:has(#srTimetable > .sr-row) main > .grid {
+    grid-template-columns: minmax(250px, 24%) minmax(0, 76%) !important;
+  }
+}
+
+@media (max-width: 1050px) {
+  main > .grid,
+  body:has(#srTimetable > .sr-row) main > .grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
