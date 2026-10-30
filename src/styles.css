@@ -1,0 +1,85 @@
+/* Shared ShiftReader shell styles.
+   This is intentionally small and safe: it establishes a clean baseline without
+   attempting to rewrite the legacy design system in one pass.
+*/
+
+:root {
+  --sr-bg: #07101f;
+  --sr-panel: #0d1728;
+  --sr-panel-alt: #111d31;
+  --sr-border: rgba(148, 163, 184, 0.25);
+  --sr-text: #e8eef9;
+  --sr-muted: #93a4bc;
+  --sr-accent: #60a5fa;
+  --sr-accent-2: #2563eb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--sr-bg);
+  color: var(--sr-text);
+  font: 15px/1.5 system-ui, 'Segoe UI', sans-serif;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 14px 20px;
+  background: linear-gradient(125deg, #07101f, #172554);
+  border-bottom: 1px solid rgba(41, 65, 102, 0.9);
+}
+
+header > div {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid var(--sr-border);
+  border-radius: 16px;
+  box-shadow: 0 18px 45px rgba(2, 6, 23, 0.38);
+  padding: 18px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status.ok {
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.status.bad {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+.status.warn {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+}
