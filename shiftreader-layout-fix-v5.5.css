@@ -1,0 +1,48 @@
+/* ShiftReader layout balance v5.5
+   Layout only: gives the schedule panel more horizontal space.
+   No timetable internals, OCR controls, alarm styles, or HTML elements are changed. */
+
+@media (min-width: 1051px) {
+  header > div,
+  main {
+    width: min(100% - 32px, 1600px) !important;
+    max-width: 1600px !important;
+  }
+
+  main > .grid {
+    display: grid !important;
+    grid-template-columns: minmax(360px, 0.72fr) minmax(620px, 1.28fr) !important;
+    align-items: start !important;
+    gap: 18px !important;
+  }
+
+  main > .grid > .card {
+    min-width: 0 !important;
+  }
+
+  main > .grid > .card:first-child {
+    max-width: none !important;
+  }
+
+  main > .grid > .card:nth-child(2) {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  main > .grid > .card:nth-child(2) .sr-timetable {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 1051px) and (max-width: 1250px) {
+  main > .grid {
+    grid-template-columns: minmax(330px, 0.8fr) minmax(560px, 1.2fr) !important;
+  }
+}
+
+@media (max-width: 1050px) {
+  main > .grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
