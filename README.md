@@ -215,4 +215,4 @@ Large refactors should demonstrate that they preserve the current working behavi
 - Does it work? Somehow, yes.
 - Is it being rewritten? No.
 
-ShiftReader has reached the most stable phase of software development: **the owner is done touching it.**
+ShiftReader has reached the most stable phase of software development: **I am done touching it.**
