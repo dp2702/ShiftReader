@@ -122,7 +122,7 @@ Do not delete a file merely because another file has a higher version number unl
 
 ## Why the code is shitty
 
-Because this was built by solving the next visible problem instead of repeatedly rebuilding the whole application around a clean design.
+Because this was built by solving the next visible problem instead of repeatedly rebuilding the whole application around a clean design. Also shitty ai's have been used and i spent like a total of 3 hours into this.
 
 More specifically:
 
